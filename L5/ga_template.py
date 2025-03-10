@@ -51,9 +51,9 @@ def reproduce(mother, father):
 
     r = random.randint(0, 1)
     if r == 0:
-        child = (mother(0), father(1), father(2))
+        child = [mother[0], father[1], father[2]]
     else:
-        child = (mother(0), mother(1), father(2))
+        child = [mother[0], mother[1], father[2]]
 
     r1 = random.uniform(0, 1)
 
@@ -68,16 +68,15 @@ def mutate(individual):
     Return the mutated individual
     '''
     r = random.randint(0, 2)
-    l = list
+    l = []
     for i in range(len(individual)):
         if r == i:
             if individual[i] == 0:
-                list.append(0)
-                break
+                l.append(1)
             else:
-                list.append(1)
-                break
-        list.append(individual[i])
+                l.append(0)
+        else:
+            l.append(individual[i])
 
     return tuple(l)
 
