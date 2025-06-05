@@ -1,105 +1,102 @@
-class Node:  # Node has only PARENT_NODE, STATE, DEPTH
-    def __init__(self, state, parent=None, depth=0):
+import heapq
+import itertools
+
+class Node:
+    def __init__(self, state, parent=None, depth=0, cost=0, heuristic=0):
         self.STATE = state
         self.PARENT_NODE = parent
         self.DEPTH = depth
+        self.COST = cost
+        self.HEURISTIC = heuristic
+        self.TOTAL_COST = cost + heuristic
 
-    def path(self):  # Create a list of nodes from the root to this node.
+    def path(self):
         current_node = self
         path = [self]
-        while current_node.PARENT_NODE:  # while current node has parent
-            current_node = current_node.PARENT_NODE  # make parent the current node
-            path.append(current_node)   # add current node to path
-        return path
+        while current_node.PARENT_NODE:
+            current_node = current_node.PARENT_NODE
+            path.append(current_node)
+        return list(reversed(path))
 
     def display(self):
         print(self)
 
     def __repr__(self):
-        return 'State: ' + str(self.STATE) + ' - Depth: ' + str(self.DEPTH)
+        return f"State: {self.STATE} - Depth: {self.DEPTH} - Cost: {self.COST} - Heuristic: {self.HEURISTIC}"
 
+# New heuristic values
+HEURISTIC_VALUES = {
+    'A': 6, 'B': 5, 'C': 5, 'D': 2, 'E': 4, 'F': 5,
+    'G': 4, 'H': 1, 'I': 2, 'J': 1, 'K': 0, 'L': 0
+}
 
-'''
-Search the tree for the goal state and return path from initial state to goal state
-'''
-def TREE_SEARCH():
-    fringe = []
-    initial_node = Node(INITIAL_STATE)
-    fringe = INSERT(initial_node, fringe)
-    while fringe is not None:
-        node = REMOVE_FIRST(fringe)
-        if node.STATE == GOAL_STATE:
-            return node.path()
-        children = EXPAND(node)
-        fringe = INSERT_ALL(children, fringe)
-        print("fringe: {}".format(fringe))
+# New weighted edges
+STATE_SPACE = {
+    'A': [('B', 1), ('C', 2), ('D', 4)],
+    'B': [('F', 5), ('E', 4)],
+    'C': [('E', 1)],
+    'D': [('H', 1), ('I', 4), ('J', 2)],
+    'E': [('G', 2), ('H', 3)],
+    'F': [('G', 1)],
+    'G': [('K', 6)],
+    'H': [('K', 6), ('L', 5)],
+    'I': [('L', 3)],
+    'J': [],
+    'K': [],
+    'L': []
+}
 
-
-'''
-Expands node and gets the successors (children) of that node.
-Return list of the successor nodes.
-'''
-def EXPAND(node):
-    successors = []
-    children = successor_fn(node.STATE)
-    for child in children:
-        s = Node(node)  # create node for each in state list
-        s.STATE = child  # e.g. result = 'F' then 'G' from list ['F', 'G']
-        s.PARENT_NODE = node
-        s.DEPTH = node.DEPTH + 1
-        successors = INSERT(s, successors)
-    return successors
-
-
-'''
-Insert node in to the queue (fringe).
-'''
-def INSERT(node, queue):
-    queue.append(node)
-
-    return queue
-
-
-'''
-Insert list of nodes into the fringe
-'''
-
-def INSERT_ALL(list, queue):
-    for i in list:
-        queue.append(i)
-    return queue
-
-
-'''
-Removes and returns the first element from fringe
-'''
-def REMOVE_FIRST(queue):
-    return queue.pop(len(queue) - 1)
-
-'''
-Successor function, mapping the nodes to its successors
-'''
-def successor_fn(state):  # Lookup list of successor states
-    return STATE_SPACE[state]  # successor_fn( 'C' ) returns ['F', 'G']
-
-
+GOAL_STATES = {'K', 'L'}  # Set of goal states
 INITIAL_STATE = 'A'
-GOAL_STATE = 'J'
-STATE_SPACE = {'A': ['B', 'C'],
-               'B': ['D', 'E'], 'C': ['F', 'G'],
-               'D': [], 'E': [], 'F': [], 'G': ['H', 'I', 'J'],
-               'H': [], 'I': [], 'J': [], }
 
+def heuristic(state):
+    return HEURISTIC_VALUES.get(state, 99)
 
-'''
-Run tree search and display the nodes in the path to goal node
-'''
+def path_cost(from_node, to_state):
+    for (neighbor, cost) in STATE_SPACE[from_node.STATE]:
+        if neighbor == to_state:
+            return from_node.COST + cost
+    return from_node.COST + 9999  # fallback large cost if not found
+
+def successor_fn(state):
+    return STATE_SPACE[state]  # now returns list of (child, cost)
+
+def PRIORITY_TREE_SEARCH(weight=1.0, use_astar=True):
+    fringe = []
+    counter = itertools.count()
+    h = heuristic(INITIAL_STATE)
+    initial_node = Node(INITIAL_STATE, cost=0, heuristic=h)
+    priority = initial_node.COST + weight * h if use_astar else h
+    heapq.heappush(fringe, (priority, next(counter), initial_node))
+
+    while fringe:
+        _, _, node = heapq.heappop(fringe)
+        if node.STATE in GOAL_STATES:
+            return node.path()
+
+        for (child_state, edge_cost) in successor_fn(node.STATE):
+            new_cost = node.COST + edge_cost
+            h = heuristic(child_state)
+            total = new_cost + weight * h if use_astar else h
+            child_node = Node(child_state, node, node.DEPTH + 1, new_cost, h)
+            heapq.heappush(fringe, (total, next(counter), child_node))
+
+    return None
+
+def run_search(strategy_name, weight=1.0, use_astar=True):
+    print(f"\n=== {strategy_name} ===")
+    path = PRIORITY_TREE_SEARCH(weight=weight, use_astar=use_astar)
+    if path:
+        for node in path:
+            node.display()
+        print("Final path:", ' -> '.join(n.STATE for n in path))
+    else:
+        print("No path found.")
+
 def run():
-    path = TREE_SEARCH()
-    print('Solution path:')
-    for node in path:
-        node.display()
-
+    run_search("Greedy Best-First Search", use_astar=False)
+    run_search("A* Search", weight=1.0, use_astar=True)
+    run_search("Weighted A* Search (w=2)", weight=2.0, use_astar=True)
 
 if __name__ == '__main__':
     run()

@@ -224,17 +224,13 @@ class BayesianNetwork(object):
     # values is dictionary
     def get_joint_probability(self, values):
         """ return the joint probability of the Nodes """
-        jointProbability = 1
+        jointProbability = 1.0
 
-        for var in values:
-            v = self.varsMap[var]
-            if len(v.parents)  == 0:
-                jointProbability *= v.get_probability(v.assignments[values[0]], values)
-                print(jointProbability)
-            elif len(v.parents) == 1:
-                jointProbability *= v.parents[0].get_probability(v.a)
-            elif len(v.parents) == 2:
-
+        for var_name, value in values.items():
+            var = self.varsMap[var_name]
+            parent_values = self.sub_vals(var, values)
+            prob = var.get_probability(value, parent_values)
+            jointProbability *= prob
 
         return jointProbability
 

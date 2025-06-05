@@ -23,136 +23,82 @@ def minmax_decision(state):
 
 
 def is_terminal(state):
-    """
-    returns True if the state is either a win or a tie (board full)
-    :param state: State of the checkerboard. Ex: [0; 1; 2; 3; X; 5; 6; 7; 8]
-    :return:
-    """
-    """
-    for i in range(0, 6, 3):
-        if state[i] == state[i + 1] == state[i + 2]:
-            return True
-    """
-
     if state[0] == state[1] == state[2]:
         return True
-
     if state[3] == state[4] == state[5]:
         return True
-
     if state[6] == state[7] == state[8]:
         return True
-
-
     if state[0] == state[3] == state[6]:
         return True
-
     if state[1] == state[4] == state[7]:
         return True
-
     if state[2] == state[5] == state[8]:
         return True
-
-    """
-     for i in range(0, 2, 1):
-        if state[i] == state[i+3] == state[i+6]:
-            return True
-    """
-
-
-    if state[0] == state[4] == state[8] or state[2] == state[6 == state[4]]:
+    if state[0] == state[4] == state[8]:
+        return True
+    if state[2] == state[4] == state[6]:
         return True
 
     for position in state:
-        if isinstance(position, int) :
+        if isinstance(position, int):
             return False
     return True
 
 
 def utility_of(state):
-    """
-    returns +1 if winner is X (MAX player), -1 if winner is O (MIN player), or 0 otherwise
-    :param state: State of the checkerboard. Ex: [0; 1; 2; 3; X; 5; 6; 7; 8]
-    :return:
-    """
-    """
-    for i in range(0, 6, 3):
-        if state[i] == state[i+1] == state[i+2]:
-            if state[i] == "X":
-                return 1
-            else:
-                return -1
-    
-    """
     if state[0] == state[1] == state[2]:
         if state[0] == "X":
             return 1
         elif state[0] == "O":
             return -1
-
-
     if state[3] == state[4] == state[5]:
-        if state[0] == "X":
+        if state[3] == "X":
             return 1
-        elif state[0] == "O":
+        elif state[3] == "O":
             return -1
-
     if state[6] == state[7] == state[8]:
-        if state[0] == "X":
+        if state[6] == "X":
             return 1
-        elif state[0] == "O":
+        elif state[6] == "O":
             return -1
-
     if state[0] == state[3] == state[6]:
         if state[0] == "X":
             return 1
         elif state[0] == "O":
             return -1
-
-
     if state[1] == state[4] == state[7]:
-        if state[0] == "X":
+        if state[1] == "X":
             return 1
-        elif state[0] == "O":
+        elif state[1] == "O":
             return -1
-
     if state[2] == state[5] == state[8]:
-        if state[0] == "X":
+        if state[2] == "X":
             return 1
-        elif state[0] == "O":
+        elif state[2] == "O":
             return -1
-    """
-    for i in range(0, 2, 1):
-        if state[i] == state[i+3] == state[i+6]:
-            if state[i] == "X":
-                return 1
-            else:
-                return -1
-    """
-    if state[0] == state[4] == state[8] or state[2] == state[6 == state[4]]:
+    if state[0] == state[4] == state[8]:
         if state[4] == "X":
             return 1
-        else:
+        elif state[4] == "O":
+            return -1
+    if state[2] == state[4] == state[6]:
+        if state[4] == "X":
+            return 1
+        elif state[4] == "O":
             return -1
     return 0
 
 
 def successors_of(state):
-    """
-    returns a list of tuples (move, state) as shown in the exercise slides
-    :param state: State of the checkerboard. Ex: [0; 1; 2; 3; X; 5; 6; 7; 8]
-    :return:
-    """
-
     if state.count("X") > state.count("O"):
         turn = "O"
     else:
         turn = "X"
 
     l = []
-
-    for i in range(len (state)):
-        if isinstance(state[i], int) :
+    for i in range(len(state)):
+        if isinstance(state[i], int):
             l2 = state.copy()
             l2[i] = turn
             l.append((i, l2))

@@ -17,7 +17,7 @@ def main():
 
     # To simulate starting from index 1, we add a dummy value at index 0
     observationss = [
-        [None, 3, 1, 3],
+        [None, 2, 1, 3, 1],
         [None, 3, 3, 1, 1, 2, 2, 3, 1, 3],
         [None, 3, 3, 1, 1, 2, 3, 3, 1, 2],
     ]
